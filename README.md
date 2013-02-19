@@ -1,6 +1,6 @@
 nginx.conf 
 
-
+```
 lua_package_path '/home/www/lua/?.lua;;';
 server {
   listen 80;
@@ -15,3 +15,4 @@ server {
       content_by_lua_file $root/lua/index.lua;
   }
 }  
+```
