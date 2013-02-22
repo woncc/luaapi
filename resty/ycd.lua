@@ -31,7 +31,7 @@ function _global_init()
         end
         return global[g]
     end
-   
+    
     return _set, _get, _vars
 end
 
@@ -44,28 +44,11 @@ end
 function setup()
     local ngx_var = ngx.var
     local ngx_req = ngx.req    
-    local requ = {
-        method          = ngx_var.request_method,
-        schema          = ngx_var.schema,
-        host            = ngx_var.host,
-        hostname        = ngx_var.hostname,
-        uri             = ngx_var.request_uri,
-        path            = ngx_var.uri,
-        filename        = ngx_var.request_filename,
-        query_string    = ngx_var.query_string,
-        headers         = ngx_req.get_headers(),
-        user_agent      = ngx_var.http_user_agent,
-        remote_addr     = ngx_var.remote_addr,
-        remote_port     = ngx_var.remote_port,
-        remote_user     = ngx_var.remote_user,
-        remote_passwd   = ngx_var.remote_passwd,
-        content_type    = ngx_var.content_type,
-        content_length  = ngx_var.content_length,
-        uri_args        = ngx_req.get_uri_args(),
-        socket          = ngx_req.socket
-    }
-     local response = require "resty.ycd.response"
-     local resp = response.Response:new()
+
+    local request = require "resty.ycd.request"
+    local requ = request.Request:new()
+    local response = require "resty.ycd.response"
+    local resp = response.Response:new()
 
     --ngx.log(ngx.INFO, "cjson:", cjson.encode(route_table))
     for   uri, func_name in pairs(route_table) do

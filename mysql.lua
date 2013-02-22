@@ -18,7 +18,7 @@ function Mysql:new()
         local ok,err,errno,sqlstate = db:connect{
                 host = "127.0.0.1",
                 port = 3306,
-                database = "test",
+                database = "yundun_monitor",
                 user = "root",
                 password = "yd-db-2012",
                 max_package_size = 1024
@@ -40,5 +40,5 @@ function Mysql:query(sql)
             ngx.say("bad result: ", err, ": ", errno, ": ", sqlstate, ".")
             return
     end
-    return JSON.encode(res)
+    return res
 end
