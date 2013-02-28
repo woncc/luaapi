@@ -70,7 +70,7 @@ function disk(req, resp)
 end
 
 -- flow
-function disk(req, resp)
+function flow(req, resp)
     req:read_body()
     sql = "INSERT INTO `stats_flow` (remote_ip, node_ip, info) VALUES ('".. req.remote_addr  .."', '".. req:get_arg("ip", '') .."', '".. req:get_arg("info", '') .."')"
      if req:get_arg("ip") == nil or req:get_arg("info") == nil then 
