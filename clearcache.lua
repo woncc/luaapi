@@ -2,7 +2,7 @@ module("clearcache",package.seeall)
 local mysql = require "mysql"
 local beanstalkd = require 'resty.beanstalkd'
 local sock = ngx.socket.tcp()
-function clear(req, resp)
+function cleanurl(req, resp)
 --while true do
 if req.uri_args['url'] == nil then
 	resp:writeln("no url?")
@@ -14,7 +14,7 @@ end
 --end
 end
 
-function main() 
+function cleaner(req, resp) 
     -- new and connect
     local bean, err = beanstalkd:new()
     if not bean then
@@ -47,7 +47,7 @@ function main()
 
 end
 
-function clearCache(url) 
+function cleanCache(url) 
 	ips = mysql.Mysql:getServerIp()
 	sock:settimeout(3000)
 
