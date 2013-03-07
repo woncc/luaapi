@@ -47,7 +47,7 @@ function cleaner(req, resp)
 
 end
 
-function cleanCache(url) 
+function clearCache(url) 
 	ips = mysql.Mysql:getServerIp()
 	sock:settimeout(3000)
 
@@ -70,6 +70,6 @@ function cleanCache(url)
 	    end
 
 	end 		        
-
+return
 
 end
