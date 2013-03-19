@@ -39,7 +39,7 @@ end
 
 function Response:write(content)
     if self._eof==true then
-        local error_info = "Moochine WARNING: The response has been explicitly finished before."
+        local error_info = "WARNING: The response has been explicitly finished before."
         logger:warn(error_info)
         ngx.log(ngx.ERR, error_info)
         return
@@ -50,7 +50,7 @@ end
 
 function Response:writeln(content)
     if self._eof==true then
-        local error_info = "Moochine WARNING: The response has been explicitly finished before."
+        local error_info = "WARNING: The response has been explicitly finished before."
         logger:warn(error_info)
         ngx.log(ngx.ERR, error_info)
         return
@@ -97,7 +97,7 @@ end
 
 
 function Response:error(info)
-    local error_info = "Moochine ERROR: " .. info
+    local error_info = "ERROR: " .. info
     if self._eof==false then
         ngx.status=500
         self.headers['Content-Type'] = 'text/html; charset=utf-8'

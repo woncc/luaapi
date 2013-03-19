@@ -63,7 +63,7 @@ function setup()
                 if not ok then resp:error(ret) end
                 resp:finish()          
             else
-                local error_info = "MOOCHINE URL Mapping Error:[" .. uri .. "=>" .. func_name .. "] function or controller not found in module: " .. mod_name
+                local error_info = "URL Mapping Error:[" .. uri .. "=>" .. func_name .. "] function or controller not found in module: " .. mod_name
 
                 ngx.log(ngx.ERR, error_info)                
             end         
