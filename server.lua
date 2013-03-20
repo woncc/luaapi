@@ -30,8 +30,8 @@ function info()
             --body = "uid=1234567890",
             url = "http://" .. v.ip .. ":59188/core.whm?whm_call=info",
             timeout = 3000,
-            user = "admin",
-            password = "111111",
+	        user = ngx.var.kangleuser,
+	        password = ngx.var.kanglepass,
         }
 
 		if ok == nil then
@@ -52,8 +52,8 @@ function vhstat(req, resp)
     local ok, code, headers, status, body  = hc:request {
         url = "http://" .. req:get_arg('ip') .. ":59188/core.whm?whm_call=stat_vh&vh=" .. req:get_arg('vh') .."",
         timeout = 3000,
-        user = "admin",
-        password = "111111",
+        user = ngx.var.kangleuser,
+        password = ngx.var.kanglepass,
     }
 	if ok == nil then
 		resp:writeln(cjson.encode({status = false, info = code}))
