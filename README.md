@@ -13,8 +13,9 @@ http {
     #keepalive_timeout  0;
     keepalive_timeout  65;
 
-	lua_package_path '/home/www/lua/?.lua;;';
-	init_by_lua 'require "resty.LuaXML";require "cjson";';
+    lua_package_path '/home/lua/luaapi/?.lua;;';
+	lua_shared_dict config 1m;
+    init_by_lua_file '/home/lua/luaapi/init.lua';
 
 	server {
 	  listen 80;
