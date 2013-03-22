@@ -23,7 +23,7 @@ function cleaner(req, resp)
     end
     --ngx.say("initialized ok")
 
-    local ok, err = bean:connect('192.168.3.104', '11300')
+    local ok, err = bean:connect(config:get("beanstalkd:host"), '11300')
     if not ok then
         ngx.say("failed to connect beanstalkd:", err)
         return

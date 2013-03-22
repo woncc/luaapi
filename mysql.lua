@@ -1,7 +1,6 @@
 #!/usr/bin/env lua
 
 module('mysql',package.seeall)
-local JSON = require("cjson")
 local mysql = require "resty.mysql"
 local db = nil
 Mysql={}
@@ -16,11 +15,11 @@ function Mysql:new()
         db:set_timeout(1000)
 
         local ok,err,errno,sqlstate = db:connect{
-                host = "192.168.3.104",
+                host = config:get("monitor:dbhost"),
                 port = 3306,
-                database = "yundun_monitor",
-                user = "yd",
-                password = "123456",
+                database = config:get("monitor:dbname"),
+                user = config:get("monitor:dbuser"),
+                password = config:get("monitor:dbpass"),
                 max_package_size = 1024
         }
         if not ok then
@@ -53,11 +52,11 @@ function Mysql:getServerIp()
     db:set_timeout(1000)
 
     local ok,err,errno,sqlstate = db:connect{
-            host = "192.168.3.104",
+            host = config:get("cp:dbhost"),
             port = 3306,
-            database = "yundun_cp",
-            user = "yd",
-            password = "123456",
+            database = config:get("cp:dbname"),
+            user = config:get("cp:dbuser"),
+            password = config:get("cp:dbpass"),
             max_package_size = 1024
     }
     if not ok then

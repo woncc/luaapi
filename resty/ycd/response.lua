@@ -103,7 +103,7 @@ function Response:error(info)
         self.headers['Content-Type'] = 'text/html; charset=utf-8'
         self:write(error_info)
     end
-    ngx.log(ngx.ERR, error_info)
+    ngx.log(ngx.ERR, debug.traceback())
 end
 
 function Response:is_finished()

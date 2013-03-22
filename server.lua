@@ -1,24 +1,20 @@
 module("server",package.seeall)
 local http = require "resty.http"
-local mysql = require "mysql"
-local xmlSimple = require("resty.xmlSimple").newParser()
-require("resty.LuaXML")
+--local xml = require("resty.LuaXML") --need put to init_by_lua,otherwise lua_code_cache on error
 
 function ips() 
-	ips = mysql.Mysql:getServerIp()
-
-	for _, v in pairs(ips) do
+	local ip = mysql.Mysql:getServerIp()
+	for _, v in pairs(ip) do
 	    ngx.say(v.ip)
-	end 		        
-
+	end
 end
 
 function info()
-	ips = mysql.Mysql:getServerIp()
+	local ip = mysql.Mysql:getServerIp()
 	--[[ips = {}二维数组
 	ips[1] = {}
 	ips[1]["ip"] = "45.238.236.226"]]--
-	for _, v in pairs(ips) do
+	for _, v in pairs(ip) do
 	    local hc = http:new()
         local ok, code, headers, status, body  = hc:request {
             --url = "http://www.qunar.com/",
@@ -30,21 +26,22 @@ function info()
             --body = "uid=1234567890",
             url = "http://" .. v.ip .. ":59188/core.whm?whm_call=info",
             timeout = 3000,
-	        user = ngx.var.kangleuser,
-	        password = ngx.var.kanglepass,
+	        user = config:get('kangleuser'),
+	        password = config:get('kanglepass'),
         }
 
 		if ok == nil then
 			ngx.say(v.ip, "\ttimeout")
 		else
-			local x = xmlSimple:ParseXmlText(body)
-			ngx.say(v.ip, "\t", x.info.result.version:value())		
+			local doc = xml.eval(body)
+			ngx.say(v.ip, "\t", doc:find("version")[1])		
 		end
 
 	end
 end
 
 function vhstat(req, resp)
+	
 	resp.headers['Content-Type'] = 'application/json; charset=utf-8'
 	resp.headers['Server'] = 'openresty+ycd'
 	req:read_body()
@@ -52,14 +49,14 @@ function vhstat(req, resp)
     local ok, code, headers, status, body  = hc:request {
         url = "http://" .. req:get_arg('ip') .. ":59188/core.whm?whm_call=stat_vh&vh=" .. req:get_arg('vh') .."",
         timeout = 3000,
-        user = ngx.var.kangleuser,
-        password = ngx.var.kanglepass,
+        user = config:get('kangleuser'),
+        password = config:get('kanglepass'),
     }
-	if ok == nil then
+	if not ok then
 		resp:writeln(cjson.encode({status = false, info = code}))
 	else
-		local doc = xml.eval(body)
-		if doc:find("name") == nil then
+		doc = xml.eval(body)
+		if not doc:find("name")  then
 			result = {
 				status = false,
 				info = 'unknown vhost',
