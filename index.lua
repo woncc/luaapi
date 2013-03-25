@@ -12,6 +12,7 @@ ycd.map("^/api/clearcache$","clearcache.cleanurl")
 ycd.map("^/api/clearcache/cleaner$","clearcache.cleaner")
 ycd.map("^/kangleip$","server.ips")
 ycd.map("^/kangleinfo$","server.info")
+ycd.map("^/kanglereload$","server.reload")
 
 ycd.map("^/ajax/vhstat", "server.vhstat")
 ycd.setup()

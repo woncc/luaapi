@@ -75,4 +75,11 @@ function vhstat(req, resp)
 	--resp:writeln(body)
 end
 
-
+function reload(req, resp) 
+	resp.headers['Content-Type'] = 'text/html; charset=utf-8'
+	local ip = mysql.Mysql:getServerIp()
+	local content = {
+		ip = ip,
+	}
+	resp:tpl(content, config:get('templatedir')..'/reload.html')
+end

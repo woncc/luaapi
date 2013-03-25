@@ -5,6 +5,7 @@ module('resty.ycd.response',package.seeall)
 local table_insert = table.insert
 local table_concat = table.concat
 local string_match = string.match
+local tirtemplate = require('resty.ycd.tirtemplate')
 
 Response={}
 
@@ -60,6 +61,13 @@ function Response:writeln(content)
     table_insert(self._output,"\r\n")
 end
 
+function Response:tpl(data, filename) 
+    local page = tirtemplate.tload(filename)
+    local context = data
+    -- render template with counter as context
+    -- and return it to nginx
+    table_insert(self._output, page(context))    
+end
 function Response:redirect(url, status)
     ngx.redirect(url, status)
 end
