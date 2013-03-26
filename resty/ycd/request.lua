@@ -21,6 +21,7 @@
 module('resty.ycd.request',package.seeall)
 
 local string_len = string.len
+local string_sub = string.sub
 
 Request = {}
 
@@ -80,6 +81,11 @@ function Request:get_post_arg(name, default)
 
     local arg = self.post_args[name]
     if arg~=nil then
+        --parse post array
+        if  string_sub(name, -2) == '[]' and type(arg)=='table' then
+            --ngx.log(ngx.INFO, string_sub(name, 1, -3))
+            return arg
+        end 
         if type(arg)=='table' then
             for _, v in ipairs(arg) do
                 if v and string_len(v)>0 then
