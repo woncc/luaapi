@@ -53,7 +53,7 @@ function getDomainRecord( domain, recordType)
     local result = nil
     for i = 1, #answers do
         local ans = answers[i]
-        --ngx.log(ngx.DEBUG, "recordType=%d, ans.type=%d ", rtype[recordType], ans.type)
+        ngx.log(ngx.DEBUG, ans.name, " ", ans.address or ans.cname, " type:", ans.type, " class:", ans.class, " ttl:", ans.ttl)
         if rtype[recordType] == ans.type then
         	result = ans.address or ans.cname
         end
@@ -75,18 +75,22 @@ function getDomainByGoogle( domain )
 		return {}
 	else
 		local content = cjson.decode(body)
-		local  subdomain = {domain, 'www.'..domain}
+		local  subdomain = {'', 'www.', 'bbs.', 'vip.', 'news.'}
 		if content.responseStatus == 200 then
 			for i=1, #content.responseData.results do
 				local res = content.responseData.results[i]
 				if table_search(res.visibleUrl, subdomain) == nil then
-					table.insert(subdomain, res.visibleUrl) --insert subdomain to table
+					table.insert(subdomain, string.sub(res.visibleUrl,1, -string.len(domain))) --insert subdomain to table
 				end
 			end
 			local  results = {status = true, data = {}}
 			for i=1, #subdomain do
-				local  sd = subdomain[i]
-				results.data[i] = {domain = sd, ip = getDomainRecord(sd, 'A')}
+				local  sd = subdomain[i] .. domain
+				ngx.log(ngx.DEBUG, sd)
+				local  ip = getDomainRecord(sd, 'A')
+				if ip  then 
+				results.data[i] = {domain = sd, ip = ip}
+				end
 			end
 			return results
 		end

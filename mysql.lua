@@ -66,7 +66,7 @@ function Mysql:getServerIp()
 
     db:query("set names utf8")
     
-    sql = "SELECT * FROM `server_ip` where status&2"
+    sql = "SELECT * FROM `server_ip` where status&1 and (status&2 or status & 32) and end_time>now()"
 	res,err,errno,sqlstate = db:query(sql)
 	if not res then
 	        ngx.say("bad result: ", err, ": ", errno, ": ", sqlstate, ".")
