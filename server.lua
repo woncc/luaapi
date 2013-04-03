@@ -140,7 +140,7 @@ function reload(req, resp)
 			    	if not bytes then
 			    		ngx.say("failed to send request: ", err)
 			    	else
-			    		ngx.say("reload kangle no table ok:\t", v)
+			    		ngx.say("reload kangle ok:\t", v)
 			    	end
 			    end
 		else

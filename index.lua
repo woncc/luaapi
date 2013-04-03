@@ -17,5 +17,7 @@ ycd.map("^/kangleipinfo$","server.ipinfo")
 ycd.map("^/kanglereload$","server.reload")
 
 ycd.map("^/ajax/vhstat", "server.vhstat")
+ycd.map("^/ajax/domainrecord", "domain.record")
+
 ycd.setup()
 
