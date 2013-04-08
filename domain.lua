@@ -7,14 +7,15 @@ function record(req, resp)
 	resp.headers['Content-Type'] = 'application/json; charset=utf-8'
 	resp.headers['Server'] = 'openresty+ycd'
 	req:read_body()
+  local domain = req:get_arg('domain') or ''
 	--getRecordByAxfr('cb.vu')
-	local results = getDomainByGoogle('360.cn')
-	local record = getDomainRecord('www.baidudfsfd.com', 'CNAME')
-	if not record then
+	local results = getDomainByGoogle(domain)
+	--local record = getDomainRecord('www.baidudfsfd.com', 'CNAME')
+	--if not record then
 		--resp:writeln("no record")
-	else
-		resp:writeln(record)
-	end
+	--else
+	--	resp:writeln(record)
+	--end
 	resp:write(cjson.encode(results))
 end
 
@@ -75,24 +76,30 @@ function getDomainByGoogle( domain )
 		return {}
 	else
 		local content = cjson.decode(body)
-		local  subdomain = {'', 'www.', 'bbs.', 'vip.', 'news.'}
+		local  subdomain = {'@', 'www', 'bbs', 'vip', 'news'}
 		if content.responseStatus == 200 then
 			for i=1, #content.responseData.results do
 				local res = content.responseData.results[i]
-				if table_search(res.visibleUrl, subdomain) == nil then
-					table.insert(subdomain, string.sub(res.visibleUrl,1, -string.len(domain))) --insert subdomain to table
+        local vs = string.sub(res.visibleUrl,1, -string.len(domain) - 2)
+				if table_search(vs, subdomain) == nil then
+					table.insert(subdomain, vs) --insert subdomain to table
 				end
 			end
-			local  results = {status = true, data = {}}
+			local  result = {status = false, data = {}}
+      local  j = 1
 			for i=1, #subdomain do
-				local  sd = subdomain[i] .. domain
-				ngx.log(ngx.DEBUG, sd)
+				local  sd = subdomain[i] .. '.' .. domain
+        if i == 1 then sd = domain end
+				ngx.log(ngx.DEBUG, sd, string.len(sd))
 				local  ip = getDomainRecord(sd, 'A')
-				if ip  then 
-				results.data[i] = {domain = sd, ip = ip}
+				if ip  then
+         
+				  result.data[j] = {subdomain = subdomain[i], ip = ip, domain = domain}
+          j = j+1
 				end
 			end
-			return results
+      if #result.data then result.status = true end
+			return result
 		end
 	end
 end
