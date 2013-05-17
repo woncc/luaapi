@@ -19,5 +19,6 @@ ycd.map("^/kanglereload$","server.reload")
 ycd.map("^/ajax/vhstat", "server.vhstat")
 ycd.map("^/ajax/domainrecord", "domain.record")
 
+ycd.map("^/ajax/stats_s", "stats.s")
 ycd.setup()
 
