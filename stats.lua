@@ -14,7 +14,7 @@ function s(req, resp)
     if not res then
     result['cache_bw'] = 0
     else 
-  	result['cache_bw'] = tonumber(res[1].cache_bw) or 0
+  	result['cache_bw'] = tonumber(res[1].cache_bw)*5 or 0
   	end
     
     mysql.Mysql:init("127.0.0.1", "admin", "BtnzbelyqYWv8tvRFYzy", "yundun_stat")
@@ -22,7 +22,7 @@ function s(req, resp)
     if not res then
     	result['cc_num'] = 0
     else     
-    	result['cc_num'] = tonumber(res[1].cc_num) or 0
+    	result['cc_num'] = tonumber(res[1].cc_num)*5 or 0
     end
   	
   	
