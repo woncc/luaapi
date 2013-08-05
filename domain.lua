@@ -1,6 +1,6 @@
 module("domain",package.seeall)
 local http = require "resty.http"
-
+local whois = require "resty.whois"
 
 function record(req, resp)
 	
@@ -17,6 +17,25 @@ function record(req, resp)
 	--	resp:writeln(record)
 	--end
 	resp:write(cjson.encode(results))
+end
+
+function nameserver(req, resp)
+	local wh, err = whois:new()
+    if not wh then
+        ngx.say("failed to init :", err)
+        return
+    end	
+    wh:set_timeout(2000)
+	local ok, err = wh:connect("whois.verisign-grs.com", "43")
+    if not ok then
+        ngx.say("failed to connect whois:", err)
+        return
+    end	
+	local f,m = wh:nameserver('baidu.com')
+	if not f then
+		resp:write(m)
+	end
+	resp:write(cjson.encode(f))
 end
 
 --[[
