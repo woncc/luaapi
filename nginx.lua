@@ -26,7 +26,7 @@ function source(req, resp)
 
     local id, data = bean:peekready()   
     if not id then
-    	ngx.say("no queue in cleancache")
+    	ngx.say("no queue in nginxsource")
     	return
     end
     local nfindex =split_by_char(data, "\t")
@@ -81,7 +81,7 @@ function addSource(domain, domain_id, domain_type)
 	local listen = config:get("nginx:proxy_port") or 8081
     mysql.Mysql:init(config:get("cp:dbhost"), config:get("cp:dbuser"), config:get("cp:dbpass"), config:get("cp:dbname"))
     if domain_type == "cname" then
-    	res = mysql.Mysql:Q("SELECT * FROM `member_domain_" .. domain_type .. "` WHERE parent_id='" .. domain_id  .. "' and balance_group_id=0 and view='any'")
+    	res = mysql.Mysql:Q("SELECT domain,GROUP_CONCAT(`host`) source FROM `member_domain_cname` WHERE parent_id='" .. domain_id  .. "' and balance_group_id=0 and `view`<>'searchengine' GROUP BY `domain`")
     else
     	res = mysql.Mysql:Q("SELECT * FROM `member_domain_ns_record` WHERE domain_id='" .. domain_id  .. "' and balance_group_id=0 and status=1")
     end
@@ -100,18 +100,23 @@ function addSource(domain, domain_id, domain_type)
     		end
     		proxy_str = proxy_str .. "}\nserver {\n\tlisten  " .. listen .. ";\n\tserver_name    " .. server_name .. ";\n\tlocation / {\n\t\tproxy_pass    http://" .. upstream_name .. ";\n\t}\n}\n"
     	end
-    		ngx.say(server_name)
-    	ngx.say(proxy_str)    	
+    		ngx.say(server_name)  	
     end
     if res and domain_type == "cname" then
     	for key, val in pairs(res) do
+	    	local upstream_name = "up_" .. string.gsub(domain, "%.", "") .. "_" .. key
     		local server_name = string.gsub(val.domain, ":%d+", "")
     		server_name = string.gsub(server_name, "@%.", "")
-    		local proxy_pass = string.gsub(val.host, ":0", "")
-    		if not vhost[proxy_pass] then vhost[proxy_pass] = {} end
-			if proxy_pass ~= "" then
-    		proxy_str = proxy_str  .. "server {\n\tlisten  " .. listen .. ";\n\tserver_name    " .. server_name .. ";\n\tlocation / {\n\t\tproxy_pass    http://" .. proxy_pass .. ";\n\t}\n}\n"
+    		proxy_str = proxy_str .. "upstream " .. upstream_name .. " {\n"
+    		local sbc = split_by_char(val.source, ",")
+    		for _,val in pairs(sbc) do
+    			if val ~= "" then
+    				local proxy_pass = string.gsub(val, ":0", "")
+    				proxy_str = proxy_str .. "\tserver " .. proxy_pass .. "  max_fails=3  fail_timeout=60s;\n"
+    			end
     		end
+    		proxy_str = proxy_str .. "}\nserver {\n\tlisten  " .. listen .. ";\n\tserver_name    " .. server_name .. ";\n\tlocation / {\n\t\tproxy_pass    http://" .. upstream_name .. ";\n\t}\n}\n"
+    		ngx.say(server_name)  	
     	end
     end
 	local control_id = getControlId(domain_id, domain_type)
