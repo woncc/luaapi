@@ -8,6 +8,8 @@ local strlen    = string.len
 local strsub    = string.sub
 local strmatch  = string.match
 local tabconcat = table.concat
+local strfind   = string.find
+local tabinsert = table.insert
 local whoisserver = {
 	["ac"] = "whois.nic.ac", -- Ascension Island
 	-- ad - Andorra - no whois server assigned
@@ -303,12 +305,17 @@ function connect(self, host, port, ...)
     return sock:connect(host, port, ...)
 end
 
-function nameserver(self, domain)
+function nameserver(self, domain, domain_type)
     local sock = self.sock
     if not sock then
         return nil, "not initialized"
     end
-    local cmd = {"=", domain, "\r\n"}
+
+	local cmd = {domain, "\n"}
+	if domain_type == 'com' then 
+		cmd = {"=", domain, "\n"}
+	end
+	    
     local bytes, err = sock:send(tabconcat(cmd))
     if not bytes then
         return nil, "failed to get nameserver, send data error: " .. err
@@ -322,19 +329,23 @@ function nameserver(self, domain)
 end
 
 function get_whoisserver(self, domain)
-	local exp = self.explode(".", domain)
-	return exp
+	local exp = self.explode(domain, ".")
+	if not whoisserver[exp[#exp]] then
+		return nil, "nameserver not exist"
+	else
+		return whoisserver[exp[#exp]],exp[#exp]
+	end
 end
 
-function explode(self, div,str)
+function explode(str, div)
   if (div=='') then return false end
   local pos,arr = 0,{}
   -- for each divider found
-  for st,sp in function() return string.find(str,div,pos,true) end do
-  table.insert(arr,string.sub(str,pos,st-1)) -- Attach chars left of current divider
+  for st,sp in function() return strfind(str,div,pos,true) end do
+  tabinsert(arr,strsub(str,pos,st-1)) -- Attach chars left of current divider
   pos = sp + 1 -- Jump past current divider
   end
-  table.insert(arr,string.sub(str,pos)) -- Attach chars right of last divider
+  tabinsert(arr,strsub(str,pos)) -- Attach chars right of last divider
   return arr
  end
 

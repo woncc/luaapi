@@ -19,30 +19,71 @@ function record(req, resp)
 	resp:write(cjson.encode(results))
 end
 
+--http://127.0.0.1:81/klajax/nameserver?domain=baidu.com&action=raw
 function nameserver(req, resp)
+	resp.headers['Content-Type'] = 'application/json; charset=utf-8'
+	resp.headers['Server'] = 'openresty+ycd'
+	req:read_body()
+	local result = {["status"] = 0, ["info"] = "", ["data"] = {}}
+  	local domain = req:get_arg('domain') or ''
+  	local action = req:get_arg('action') or ''
 	local wh, err = whois:new()
     if not wh then
-        ngx.say("failed to init :", err)
-        return
+        result = {["status"] = 0, ["info"] = err}
     end	
-    wh:set_timeout(2000)
-	local ok, err = wh:connect("whois.verisign-grs.com", "43")
-    if not ok then
-        ngx.say("failed to connect whois:", err)
-        return
-    end	
-	local f,m = wh:nameserver('baidu.com')
+	local f,m = wh:get_whoisserver(domain)
 	if not f then
-		resp:write(m)
+		result = {["status"] = 0, ["info"] = f}
 	end
-	resp:write(cjson.encode(f))
+
+    wh:set_timeout(5000)
+	local ok, err = wh:connect(f, "43")
+    if not ok then
+        err = "failed to connect whois:" .. err
+        result = {["status"] = 0, ["info"] = err}
+    end	
+    local res = wh:nameserver(domain,m)
+   	local ns = {}
+    if not res then
+    	result = {["status"] = 0, ["info"] =  'get empty'}
+    else
+	    for s in string.gmatch(res, "%s*Name Server: (%S+)") do
+	    	table.insert(ns, string.lower(s))
+	    end
+    	result = {["status"] = 1, ["info"]="success", ["data"]=  ns}
+    end
+    
+    if action == "raw" then
+	    resp:write(res)
+    else
+		resp:write(cjson.encode(result))
+	end
 end
 
+--http://127.0.0.1:81/klajax/domaincname?domain=*.baidu.com
+function domaincname(req, resp)
+	resp.headers['Content-Type'] = 'application/json; charset=utf-8'
+	resp.headers['Server'] = 'openresty+ycd'
+	req:read_body()
+  	local domain = req:get_arg('domain') or ''
+  	domain = string.gsub(domain, "@%.", "")
+  	domain = string.gsub(domain, "*%.", "xd234-3s.")
+  	
+  	local cname = getDomainRecord(domain, "CNAME", 1)
+  	local result = {}
+  	if not cname then
+	  	result = {["status"] = 0, ["info"] = "不能获取到cname", ["data"] = ""}
+  	else
+		result = {["status"] = 1, ["info"] = "", ["data"] = cname}
+  	end
+	
+  	resp:write(cjson.encode(result))
+end
 --[[
 get domain record
 recordType : A|CNAME
 ]]--
-function getDomainRecord( domain, recordType)
+function getDomainRecord( domain, recordType, fixed)
 	local rtype = {
 		A      = 1,
 		NS     = 2,
@@ -76,6 +117,7 @@ function getDomainRecord( domain, recordType)
         ngx.log(ngx.DEBUG, ans.name, " ", ans.address or ans.cname, " type:", ans.type, " class:", ans.class, " ttl:", ans.ttl)
         if rtype[recordType] == ans.type then
         	result = ans.address or ans.cname
+        	if fixed == i then break end
         end
         --ngx.say(ans.name, " ", ans.address or ans.cname,
         --        " type:", ans.type, " class:", ans.class,

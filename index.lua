@@ -21,7 +21,8 @@ ycd.map("^/ajax/domainrecord", "domain.record")
 
 ycd.map("^/ajax/stats_s", "stats.s")
 ycd.map("^/klajax/stats_s", "server.vhstat")
-ycd.map("^/ajax/nameserver", "domain.nameserver")
+ycd.map("^/klajax/nameserver", "domain.nameserver")
+ycd.map("^/klajax/domaincname", "domain.domaincname")
 
 ycd.map("^/api/nginx/source$","nginx.source")
 ycd.setup()
