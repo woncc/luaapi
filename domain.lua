@@ -50,7 +50,11 @@ function nameserver(req, resp)
 	    for s in string.gmatch(res, "%s*Name Server: (%S+)") do
 	    	table.insert(ns, string.lower(s))
 	    end
-    	result = {["status"] = 1, ["info"]="success", ["data"]=  ns}
+	    if #ns == 0 then 
+		    result = {["status"] = 0, ["info"]="不能获取到ns服务器"}
+	    else
+    		result = {["status"] = 1, ["info"]="success", ["data"]=  ns}
+    	end
     end
     
     if action == "raw" then
