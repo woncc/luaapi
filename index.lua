@@ -25,5 +25,12 @@ ycd.map("^/klajax/nameserver", "domain.nameserver")
 ycd.map("^/klajax/domaincname", "domain.domaincname")
 
 ycd.map("^/api/nginx/source$","nginx.source")
+
+ycd.map("^/source/check$","source.check")
+
+ycd.map("^/tools/zuhe$","tools.zuhe")
+
+ycd.map("^/antiddos.yundun.cn/verify$","verify.check")
+ycd.map("^/antiddos.yundun.cn/verifycode","verify.code")
 ycd.setup()
 
