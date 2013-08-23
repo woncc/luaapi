@@ -21,22 +21,22 @@ function check(req, resp)
 		local code = req:get_arg('code') or ''
 		local setkey = ngx.md5(ngx.req.get_headers()["Host"] .. ngx.req.get_headers()["User-Agent"])
 		local codekey,flag,err = memcache:get(setkey)
-		local data = ''
+		local data = 'hello,word!'
 		if not codekey then
 			data = '2v7x'
 		    result = {["status"] = 0, ["info"] = "未知错误", ["code"] = -3}
 		else
-			local data,flag,err = memcache:get(codekey)
+			data,flag,err = memcache:get(codekey)
 			if not data then
 				result = {["status"] = 0, ["info"] = "未知错误", ["code"] = -4}
 			end	
 		end
-		if data == code then
+		if  data == code then
             --expires = ngx.cookie_time(4523969511)
             ngx.header["Set-Cookie"] = {"bdshare_id="..setkey.."; path=/"};-- expires=" .. expires .. ";
 			result = {["status"] = 1, ["info"] = "验证正确"}
 		else
-			result = {["status"] = 0, ["info"] = "输入验证码有误，请重新输入。"}
+			result = {["status"] = 0, ["info"] = "输入验证码有误，请重新输入。"}--, ["data"] = data, ["code"] = code}
 		end
     end
 	resp:write(cjson.encode(result))
