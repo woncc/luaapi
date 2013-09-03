@@ -1,5 +1,7 @@
 module("verify",package.seeall)
 local memcached = require "resty.memcached"
+local string_find, string_sub, string_format = string.find, string.sub, string.format
+local table_concat, table_insert = table.concat, table.insert
 
 function check(req, resp) 
 	resp.headers['Content-Type'] = 'application/json; charset=utf-8'
@@ -33,10 +35,15 @@ function check(req, resp)
 		end
 		if  data == code then
             --expires = ngx.cookie_time(4523969511)
-            ngx.header["Set-Cookie"] = {"bdshare_id="..setkey.."; path=/"};-- expires=" .. expires .. ";
+            local expdomain = getPrimaryDomain(req.host)
+            if expdomain ~= false then
+            	ngx.header["Set-Cookie"] = {"bdshare_id="..setkey.."; domain=" .. expdomain .. "; path=/"};-- expires=" .. expires .. ";
+            else
+            	ngx.header["Set-Cookie"] = {"bdshare_id="..setkey.."; path=/"};
+            end
 			result = {["status"] = 1, ["info"] = "验证正确"}
 		else
-			result = {["status"] = 0, ["info"] = "输入验证码有误，请重新输入。"}--, ["data"] = data, ["code"] = code}
+			result = {["status"] = 0, ["info"] = "输入验证码有误，请重新输入。", ["data"] = data, ["code"] = code}
 		end
     end
 	resp:write(cjson.encode(result))
@@ -71,4 +78,45 @@ function code(req, resp)
         ngx.log(ngx.WARN,"failed to set memcached:", err)
     end
     resp:write(data)
+end
+
+function getPrimaryDomain(domain)
+	local sbc = split_by_char(domain, ".")
+	if #sbc  > 2 then
+		local exts = sbc[ #sbc - 1] .. '.' .. sbc[ #sbc ]
+		if in_table({'com.cn', 'com.au','com.sg', 'net.cn', 'gov.cn', 'org.cn', 'edu.cn','com.hk', 'net.hk', 'co.uk'} , exts) == true then
+			return '.' .. sbc[#sbc - 2 ] .. '.' .. exts
+		end
+	end
+	if in_table({'com', 'net', 'hk','im', 'cn' ,'vn' , 'me', 'gov', 'edu', 'org', 'biz', 'info', 'name', 'cc', 'la', 'asia', 'pw', 'tk', 'so', 'co', 'de', 'dk', 'in', 'eu','lo'} , sbc[#sbc]) == true then
+		return '.' .. sbc[#sbc - 1].. '.' .. sbc[ #sbc ]
+	end
+	return false
+end
+
+function in_table ( t , e )
+	for _,v in pairs(t) do
+		if (v==e) then return true end
+	end
+	return false
+end
+
+function split_by_char(str, div)
+  local result = false
+  if div ~= "" then
+    local pos = 0
+    result = {}
+
+    if str ~= "" then
+      -- for each divider found
+      for st, sp in function() return string_find(str, div, pos, true) end do
+        -- Attach chars left of current divider
+        table_insert(result, string_sub(str, pos, st - 1))
+        pos = sp + 1 -- Jump past current divider
+      end
+      -- Attach chars right of last divider
+      table_insert(result, string_sub(str, pos))
+    end
+  end
+  return result
 end
