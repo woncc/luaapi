@@ -43,12 +43,14 @@ function nameserver(req, resp)
         result = {["status"] = 0, ["info"] = err}
     end	
     local res = wh:nameserver(domain,m)
+    resp:write(res)
    	local ns = {}
     if not res then
     	result = {["status"] = 0, ["info"] =  'get empty'}
     else
-	    for s in string.gmatch(res, "%s*Name Server: (%S+)") do
-	    	table.insert(ns, string.lower(s))
+	    for s in string.gmatch(res, "%s*Name Server:%s*(%S+)") do
+	    	local tmp = string.find(s, "%.")
+	    	if  tmp then table.insert(ns, string.lower(s)) end
 	    end
 	    if #ns == 0 then 
 		    result = {["status"] = 0, ["info"]="不能获取到ns服务器"}
