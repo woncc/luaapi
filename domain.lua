@@ -43,7 +43,6 @@ function nameserver(req, resp)
         result = {["status"] = 0, ["info"] = err}
     end	
     local res = wh:nameserver(domain,m)
-    resp:write(res)
    	local ns = {}
     if not res then
     	result = {["status"] = 0, ["info"] =  'get empty'}
