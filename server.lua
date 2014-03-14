@@ -23,7 +23,7 @@ function ipinfo(req, resp)
 		ngx.print(req:get_arg('ip') .. "\ttimeout")
 	else
 		local doc = xml.eval(body)
-		ngx.print(req:get_arg('ip') .. "\t" .. doc:find("version")[1])		
+		ngx.print(req:get_arg('ip') .. "\tversion:" .. doc:find("version")[1]	.. "\tconnect:" .. doc:find("connect")[1]	.. "\tvh:" .. doc:find("vh")[1])	
 	end	
 end
 
